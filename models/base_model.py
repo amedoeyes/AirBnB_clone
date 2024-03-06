@@ -4,6 +4,7 @@
 
 import uuid
 from datetime import datetime
+import models
 
 
 class BaseModel:
@@ -22,11 +23,13 @@ class BaseModel:
         else:
             self.id = str(uuid.uuid4())
             self.created_at = self.updated_at = datetime.now()
+            models.storage.new(self)
 
     def save(self):
         """save object"""
 
         self.updated_at = datetime.now()
+        models.storage.save()
 
     def to_dict(self):
         """return dictionary representation of object"""
