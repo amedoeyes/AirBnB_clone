@@ -92,3 +92,7 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(base_dict["created_at"], base.created_at.isoformat())
         self.assertEqual(base_dict["updated_at"], base.updated_at.isoformat())
         self.assertEqual(base_dict["__class__"], base.__class__.__name__)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -25,13 +25,13 @@ class BaseModel:
             self.created_at = self.updated_at = datetime.now()
             models.storage.new(self)
 
-    def save(self):
+    def save(self) -> None:
         """save object"""
 
         self.updated_at = datetime.now()
         models.storage.save()
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """return dictionary representation of object"""
 
         new_dict = self.__dict__.copy()
@@ -40,7 +40,7 @@ class BaseModel:
         new_dict["__class__"] = self.__class__.__name__
         return new_dict
 
-    def __str__(self):
+    def __str__(self) -> str:
         """return string representation of object"""
 
         return "[{}] ({}) {}".format(
