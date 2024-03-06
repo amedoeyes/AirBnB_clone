@@ -20,6 +20,17 @@ class TestBaseModel(unittest.TestCase):
         for method in dir(base_model.BaseModel):
             self.assertIsNotNone(method.__doc__)
 
+    def test_init_dict(self):
+        """Test init with dict"""
+
+        base1 = base_model.BaseModel()
+        base2 = base_model.BaseModel(**base1.to_dict())
+
+        self.assertNotEqual(base1, base2)
+        self.assertEqual(base1.id, base2.id)
+        self.assertEqual(base1.created_at, base2.created_at)
+        self.assertEqual(base1.updated_at, base2.updated_at)
+
     def test_id(self):
         """Test id"""
 
