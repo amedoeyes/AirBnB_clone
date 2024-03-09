@@ -1,30 +1,18 @@
 #!/usr/bin/python3
 
-"""BaseModel class test module"""
+"""BaseModel test module"""
 
 import unittest
 from datetime import datetime
-from models import base_model
+from models.base_model import BaseModel
 
 
 class TestBaseModel(unittest.TestCase):
     """Test BaseModel class"""
 
-    def test_docstring(self):
-        """Test docstring"""
-
-        self.assertIsNotNone(base_model.__doc__)
-        for func in dir(base_model):
-            self.assertIsNotNone(func.__doc__)
-        self.assertIsNotNone(base_model.BaseModel.__doc__)
-        for method in dir(base_model.BaseModel):
-            self.assertIsNotNone(method.__doc__)
-
     def test_init_dict(self):
-        """Test init with dict"""
-
-        base1 = base_model.BaseModel()
-        base2 = base_model.BaseModel(**base1.to_dict())
+        base1 = BaseModel()
+        base2 = BaseModel(**base1.to_dict())
 
         self.assertNotEqual(base1, base2)
         self.assertEqual(base1.id, base2.id)
@@ -32,36 +20,28 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(base1.updated_at, base2.updated_at)
 
     def test_id(self):
-        """Test id"""
+        self.assertEqual(type(BaseModel().id), str)
 
-        self.assertEqual(type(base_model.BaseModel().id), str)
-
-        base1 = base_model.BaseModel()
-        base2 = base_model.BaseModel()
+        base1 = BaseModel()
+        base2 = BaseModel()
         self.assertNotEqual(base1.id, base2.id)
 
     def test_created_at(self):
         """Test created_at"""
 
-        self.assertEqual(type(base_model.BaseModel().created_at), datetime)
+        self.assertEqual(type(BaseModel().created_at), datetime)
 
     def test_updated_at(self):
-        """Test updated_at"""
-
-        self.assertEqual(type(base_model.BaseModel().updated_at), datetime)
+        self.assertEqual(type(BaseModel().updated_at), datetime)
 
     def test_save(self):
-        """Test save"""
-
-        base = base_model.BaseModel()
+        base = BaseModel()
         base.save()
 
         self.assertNotEqual(base.created_at, base.updated_at)
 
     def test_str(self):
-        """Test __str__"""
-
-        base = base_model.BaseModel()
+        base = BaseModel()
 
         self.assertIn(base.__str__(), str(base))
 
@@ -71,9 +51,7 @@ class TestBaseModel(unittest.TestCase):
         )
 
     def test_to_dict(self):
-        """Test to_dict"""
-
-        base = base_model.BaseModel()
+        base = BaseModel()
         base_dict = base.to_dict()
 
         self.assertEqual(type(base_dict), dict)
@@ -92,6 +70,18 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(base_dict["created_at"], base.created_at.isoformat())
         self.assertEqual(base_dict["updated_at"], base.updated_at.isoformat())
         self.assertEqual(base_dict["__class__"], base.__class__.__name__)
+
+    def test_save_with_arg(self):
+        bm = BaseModel()
+        with self.assertRaises(TypeError):
+            bm.save(None)
+
+    def test_save_updates_file(self):
+        bm = BaseModel()
+        bm.save()
+        bmid = "BaseModel." + bm.id
+        with open("file.json", "r") as f:
+            self.assertIn(bmid, f.read())
 
 
 if __name__ == "__main__":

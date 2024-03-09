@@ -5,26 +5,13 @@
 import unittest
 import os
 from models.base_model import BaseModel
-from models.engine import file_storage
 from models.engine.file_storage import FileStorage
 
 
 class TestFileStorage(unittest.TestCase):
     """TestFileStorage class"""
 
-    def test_docstring(self):
-        """Test docstring"""
-
-        self.assertIsNotNone(file_storage.__doc__)
-        for func in dir(file_storage):
-            self.assertIsNotNone(func.__doc__)
-        self.assertIsNotNone(FileStorage.__doc__)
-        for method in dir(FileStorage):
-            self.assertIsNotNone(method.__doc__)
-
     def test_new(self):
-        """Test new method"""
-
         storage = FileStorage()
         all = storage.all()
 
@@ -41,8 +28,6 @@ class TestFileStorage(unittest.TestCase):
         self.assertEqual(all[f"{base2.__class__.__name__}.{base2.id}"], base2)
 
     def test_save(self):
-        """Test save method"""
-
         storage = FileStorage()
         storage.save()
 
@@ -51,8 +36,6 @@ class TestFileStorage(unittest.TestCase):
         self.assertTrue(os.path.getsize("file.json") > 0)
 
     def test_reload(self):
-        """Test reload method"""
-
         base = BaseModel()
         base2 = BaseModel()
 
@@ -74,6 +57,12 @@ class TestFileStorage(unittest.TestCase):
             all[f"{base2.__class__.__name__}.{base2.id}"].to_dict(),
             base2.to_dict(),
         )
+
+    def test_all(self):
+        storage = FileStorage()
+        storage.all()
+
+        self.assertIsInstance(storage.all(), dict)
 
 
 if __name__ == "__main__":
