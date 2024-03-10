@@ -4,6 +4,30 @@
 
 import cmd
 import models
+import re
+from shlex import split
+import json
+
+
+def parse(line):
+    """Parse input"""
+
+    curly_braces = re.search(r"\{(.*?)\}", line)
+    brackets = re.search(r"\[(.*?)\]", line)
+
+    if curly_braces:
+        toks = split(line[: curly_braces.span()[0]])
+        args = [arg.strip(",") for arg in toks]
+        args.append(curly_braces.group().replace("'", '"'))
+        return args
+
+    if brackets:
+        toks = split(line[: brackets.span()[0]])
+        args = [arg.strip(",") for arg in toks]
+        args.append(brackets.group())
+        return args
+
+    return [arg.strip(",") for arg in split(line)]
 
 
 class HBNBCommand(cmd.Cmd):
@@ -26,10 +50,33 @@ class HBNBCommand(cmd.Cmd):
 
         return True
 
+    def default(self, line):
+        """Default behavior for cmd module when input is invalid"""
+
+        commands = {
+            "all": self.do_all,
+            "show": self.do_show,
+            "destroy": self.do_destroy,
+            "update": self.do_update,
+            "count": self.do_count,
+        }
+
+        if "." in line:
+            toks = line.split(".")
+            class_name = toks[0]
+            command = toks[1][0 : toks[1].find("(")]
+            command_args = re.search(r"\((.*?)\)", toks[1])
+            if command and command_args and command in commands:
+                command_args = command_args.group()[1:-1]
+                return commands[command](f"{class_name} {command_args}")
+
+        print(f"*** Unknown syntax: {line}")
+        return False
+
     def do_create(self, line: str) -> None:
         """Creates a new instance"""
 
-        args = line.split()
+        args = parse(line)
 
         if not args:
             print("** class name missing **")
@@ -46,7 +93,7 @@ class HBNBCommand(cmd.Cmd):
     def do_show(self, line: str) -> None:
         """Prints string representation of an instance"""
 
-        args = line.split()
+        args = parse(line)
         all_objects = models.storage.all()
 
         if not args:
@@ -73,7 +120,7 @@ class HBNBCommand(cmd.Cmd):
     def do_destroy(self, line: str) -> None:
         """Deletes an instance"""
 
-        args = line.split()
+        args = parse(line)
         all_objects = models.storage.all()
 
         if not args:
@@ -101,7 +148,8 @@ class HBNBCommand(cmd.Cmd):
     def do_all(self, line: str) -> None:
         """Prints all string representation of all instances"""
 
-        args = line.split()
+        args = parse(line)
+        print(args)
         all_objects = models.storage.all()
 
         if not args:
@@ -120,7 +168,7 @@ class HBNBCommand(cmd.Cmd):
     def do_update(self, line: str) -> None:
         """Updates an instance"""
 
-        args = line.split()
+        args = parse(line)
         all_objects = models.storage.all()
 
         if not args:
@@ -146,21 +194,52 @@ class HBNBCommand(cmd.Cmd):
             print("** attribute name missing **")
             return
 
+        obj = all_objects[f"{class_name}.{obj_id}"]
+
+        try:
+            update_dict = json.loads(args[2])
+            for key, value in update_dict.items():
+                if hasattr(obj, key):
+                    attr_type = type(getattr(obj, key))
+                    setattr(obj, key, attr_type(value))
+                else:
+                    setattr(obj, key, value)
+            models.storage.save()
+            return
+        except Exception:
+            pass
+
         if len(args) < 4:
             print("** value missing **")
             return
 
-        obj = all_objects[f"{class_name}.{obj_id}"]
         key = args[2]
         value = args[3].strip("")
-
         if hasattr(obj, key):
             attr_type = type(getattr(obj, key))
             setattr(obj, key, attr_type(value))
         else:
             setattr(obj, key, value)
-
         models.storage.save()
+
+    def do_count(self, line: str) -> None:
+        """Count the number of instances of a class"""
+
+        args = parse(line)
+
+        if not args:
+            print("** class name missing **")
+            return
+
+        if args[0] not in models.classes:
+            print("** class doesn't exist **")
+            return
+
+        count = 0
+        for value in models.storage.all().values():
+            if args[0] == value.__class__.__name__:
+                count += 1
+        print(count)
 
 
 if __name__ == "__main__":
