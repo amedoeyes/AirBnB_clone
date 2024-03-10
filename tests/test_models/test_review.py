@@ -1,7 +1,13 @@
 #!/usr/bin/python3
 
-"""Review test module"""
+"""Defines unittests for models/review.py.
+Unittest classes:
+    TestReview_instantiation
+    TestReview_save
+    TestReview_to_dict
+"""
 
+import os
 import models
 import unittest
 from datetime import datetime
@@ -9,8 +15,8 @@ from time import sleep
 from models.review import Review
 
 
-class TestReview(unittest.TestCase):
-    """Test Review class"""
+class TestReview_instantiation(unittest.TestCase):
+    """Unittests for testing instantiation of the Review class."""
 
     def test_no_args_instantiates(self):
         self.assertEqual(Review, type(Review()))
@@ -90,6 +96,27 @@ class TestReview(unittest.TestCase):
         with self.assertRaises(TypeError):
             Review(id=None, created_at=None, updated_at=None)
 
+
+class TestReview_save(unittest.TestCase):
+    """Unittests for testing save method of the Review class."""
+
+    @classmethod
+    def setUp(self):
+        try:
+            os.rename("file.json", "tmp")
+        except IOError:
+            pass
+
+    def tearDown(self):
+        try:
+            os.remove("file.json")
+        except IOError:
+            pass
+        try:
+            os.rename("tmp", "file.json")
+        except IOError:
+            pass
+
     def test_one_save(self):
         rv = Review()
         sleep(0.05)
@@ -119,6 +146,10 @@ class TestReview(unittest.TestCase):
         rvid = "Review." + rv.id
         with open("file.json", "r") as f:
             self.assertIn(rvid, f.read())
+
+
+class TestReview_to_dict(unittest.TestCase):
+    """Unittests for testing to_dict method of the Review class."""
 
     def test_to_dict_type(self):
         self.assertTrue(dict, type(Review().to_dict()))
@@ -150,10 +181,10 @@ class TestReview(unittest.TestCase):
         rv.id = "123456"
         rv.created_at = rv.updated_at = dt
         tdict = {
-            "id": "123456",
-            "__class__": "Review",
-            "created_at": dt.isoformat(),
-            "updated_at": dt.isoformat(),
+            'id': '123456',
+            '__class__': 'Review',
+            'created_at': dt.isoformat(),
+            'updated_at': dt.isoformat(),
         }
         self.assertDictEqual(rv.to_dict(), tdict)
 
