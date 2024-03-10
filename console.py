@@ -13,18 +13,11 @@ def parse(line):
     """Parse input"""
 
     curly_braces = re.search(r"\{(.*?)\}", line)
-    brackets = re.search(r"\[(.*?)\]", line)
 
     if curly_braces:
         toks = split(line[: curly_braces.span()[0]])
         args = [arg.strip(",") for arg in toks]
         args.append(curly_braces.group().replace("'", '"'))
-        return args
-
-    if brackets:
-        toks = split(line[: brackets.span()[0]])
-        args = [arg.strip(",") for arg in toks]
-        args.append(brackets.group())
         return args
 
     return [arg.strip(",") for arg in split(line)]
@@ -66,7 +59,7 @@ class HBNBCommand(cmd.Cmd):
             class_name = toks[0]
             command = toks[1][0 : toks[1].find("(")]
             command_args = re.search(r"\((.*?)\)", toks[1])
-            if command and command_args and command in commands:
+            if class_name and command and command_args and command in commands:
                 command_args = command_args.group()[1:-1]
                 return commands[command](f"{class_name} {command_args}")
 
@@ -149,7 +142,6 @@ class HBNBCommand(cmd.Cmd):
         """Prints all string representation of all instances"""
 
         args = parse(line)
-        print(args)
         all_objects = models.storage.all()
 
         if not args:
