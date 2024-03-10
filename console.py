@@ -57,7 +57,7 @@ class HBNBCommand(cmd.Cmd):
         if "." in line:
             toks = line.split(".")
             class_name = toks[0]
-            command = toks[1][0 : toks[1].find("(")]
+            command = toks[1][0:toks[1].find("(")]
             command_args = re.search(r"\((.*?)\)", toks[1])
             if class_name and command and command_args and command in commands:
                 command_args = command_args.group()[1:-1]
